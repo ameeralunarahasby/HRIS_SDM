@@ -1,5 +1,5 @@
 // --- MASUKKAN URL WEB APP ANDA DI SINI ---
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwdd5_n9PZRUxBgHiTMFS6GBx4FVIPQhnUgVEDK4PBRWlUK9wW5BaTtovS78HlIyy3j7w/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx64s4RxV7eC3mD3BlC7YUNiZW7a9JXhcy91_JUrUwRp36uJbVWwzZaLMbhdoaP53CU8A/exec";
 
 // ==========================================
 // 1. FETCH DROPDOWN DARI GOOGLE SPREADSHEET
