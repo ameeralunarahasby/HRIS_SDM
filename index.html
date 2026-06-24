@@ -2,78 +2,75 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Database Pegawai</title>
+    <title>Database Pegawai - Input Data</title>
     <style>
         body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .form-group { margin-bottom: 10px; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #007BFF; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .btn-group { margin-top: 20px; display: flex; gap: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-next { background: #28a745; color: white; }
+        .btn-prev { background: #6c757d; color: white; }
+        h3 { color: #333; border-bottom: 2px solid #007BFF; padding-bottom: 10px; }
     </style>
 </head>
 <body>
 <div class="container">
-    <h2>Form Input Pegawai</h2>
     <form id="pegawaiForm">
-        <div class="grid-2">
+        <div id="step1" class="tab-content active">
+            <h3>1. Profil Pegawai</h3>
             <div class="form-group"><label>ID Pegawai</label><input type="text" id="id_pegawai" required></div>
-            <div class="form-group"><label>NIK</label><input type="text" id="nik"></div>
             <div class="form-group"><label>Nama</label><input type="text" id="nama" required></div>
+            <div class="form-group"><label>NIK</label><input type="text" id="nik"></div>
             <div class="form-group"><label>Tempat Lahir</label><input type="text" id="tempat_lahir"></div>
             <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="tanggal_lahir"></div>
+            <div class="form-group"><label>Alamat</label><input type="text" id="alamat"></div>
+            <div class="form-group"><label>No HP</label><input type="text" id="no_hp"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+            <div class="btn-group"><button type="button" class="btn-next" onclick="nextStep(2)">Selanjutnya</button></div>
+        </div>
+
+        <div id="step2" class="tab-content">
+            <h3>2. Data Kepegawaian</h3>
             <div class="form-group"><label>NIP</label><input type="text" id="nip"></div>
             <div class="form-group"><label>Status Pegawai</label><input type="text" id="status_pegawai"></div>
             <div class="form-group"><label>Kelompok Pegawai</label><input type="text" id="kelompok_pegawai"></div>
             <div class="form-group"><label>Golongan</label><input type="text" id="golongan"></div>
-            <div class="form-group"><label>TMT Pangkat</label><input type="date" id="tmt_pangkat"></div>
-            <div class="form-group"><label>Kelompok Jabatan</label><input type="text" id="kelompok_jabatan"></div>
             <div class="form-group"><label>Jabatan</label><input type="text" id="jabatan"></div>
+            <div class="form-group"><label>Ruangan</label><input type="text" id="ruangan"></div>
             <div class="form-group"><label>TMT Jabatan</label><input type="date" id="tmt_jabatan"></div>
-            <div class="form-group"><label>Masuk RS</label><input type="date" id="masuk_rs"></div>
-            <div class="form-group"><label>Masa Kerja</label><input type="text" id="masa_kerja"></div>
-            <div class="form-group"><label>TMT CPNS</label><input type="date" id="tmt_cpns"></div>
-            <div class="form-group"><label>BUP</label><input type="text" id="bup"></div>
-            <div class="form-group"><label>TMT Pensiun</label><input type="date" id="tmt_pensiun"></div>
-            <div class="form-group"><label>Status Keluarga</label><input type="text" id="status_keluarga"></div>
+            <div class="btn-group"><button type="button" class="btn-prev" onclick="nextStep(1)">Sebelumnya</button><button type="button" class="btn-next" onclick="nextStep(3)">Selanjutnya</button></div>
+        </div>
+
+        <div id="step3" class="tab-content">
+            <h3>3. Data Keluarga</h3>
             <div class="form-group"><label>No KK</label><input type="text" id="no_kk"></div>
             <div class="form-group"><label>Pasangan</label><input type="text" id="pasangan"></div>
             <div class="form-group"><label>Jumlah Anak</label><input type="number" id="jml_anak"></div>
             <div class="form-group"><label>Anak 1</label><input type="text" id="anak1"></div>
-            <div class="form-group"><label>Anak 2</label><input type="text" id="anak2"></div>
-            <div class="form-group"><label>Anak 3</label><input type="text" id="anak3"></div>
-            <div class="form-group"><label>Alamat</label><input type="text" id="alamat"></div>
-            <div class="form-group"><label>Jenjang</label><input type="text" id="jenjang"></div>
-            <div class="form-group"><label>Fakultas</label><input type="text" id="fakultas"></div>
-            <div class="form-group"><label>Jurusan</label><input type="text" id="jurusan"></div>
-            <div class="form-group"><label>Asal Pendidikan</label><input type="text" id="asal_pendidikan"></div>
-            <div class="form-group"><label>Ruangan</label><input type="text" id="ruangan"></div>
-            <div class="form-group"><label>TMT Nota</label><input type="date" id="tmt_nota"></div>
-            <div class="form-group"><label>BPJS Kesehatan</label><input type="text" id="bpjs_kesehatan"></div>
-            <div class="form-group"><label>Ketenagakerjaan/Taspen</label><input type="text" id="ketenagakerjaan_taspen"></div>
-            <div class="form-group"><label>NPWP</label><input type="text" id="npwp"></div>
-            <div class="form-group"><label>No HP</label><input type="text" id="no_hp"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+            <div class="btn-group"><button type="button" class="btn-prev" onclick="nextStep(2)">Sebelumnya</button><button type="button" class="btn-next" onclick="nextStep(4)">Selanjutnya</button></div>
         </div>
 
-        <hr><h4>Upload Dokumen</h4>
-        <div class="grid-2">
+        <div id="step4" class="tab-content">
+            <h3>4. Upload Dokumen</h3>
             <div class="form-group"><label>Foto</label><input type="file" id="file_foto"></div>
             <div class="form-group"><label>KTP</label><input type="file" id="file_ktp"></div>
             <div class="form-group"><label>KK</label><input type="file" id="file_kk"></div>
-            <div class="form-group"><label>Ijazah</label><input type="file" id="file_ijazah"></div>
-            <div class="form-group"><label>Transkrip</label><input type="file" id="file_transkrip"></div>
-            <div class="form-group"><label>Pangkat</label><input type="file" id="file_pangkat"></div>
-            <div class="form-group"><label>Jabatan</label><input type="file" id="file_jabatan"></div>
-            <div class="form-group"><label>Nota</label><input type="file" id="file_nota"></div>
-            <div class="form-group"><label>BPJS</label><input type="file" id="file_bpjs"></div>
-            <div class="form-group"><label>Taspen</label><input type="file" id="file_ketenagakerjaan_taspen"></div>
-            <div class="form-group"><label>NPWP</label><input type="file" id="file_npwp"></div>
+            <div class="btn-group"><button type="button" class="btn-prev" onclick="nextStep(3)">Sebelumnya</button><button type="submit" id="btn" class="btn-next">Simpan Semua Data</button></div>
         </div>
-        <button type="submit" id="btn">Simpan Data</button>
     </form>
 </div>
+
+<script>
+    function nextStep(step) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.getElementById('step' + step).classList.add('active');
+    }
+</script>
 <script src="script.js"></script>
 </body>
 </html>
