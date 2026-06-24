@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload Sertifikat SDM</title>
+    <title>Sistem Unggah Sertifikat SDM</title>
     <style>
         * {
             box-sizing: border-box;
@@ -50,27 +50,43 @@
         p {
             color: #7f8c8d;
             font-size: 14px;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
             line-height: 1.5;
         }
-        .btn-link {
-            display: inline-block;
+        /* Style input file bawaan disembunyikan agar rapi */
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        .file-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #1a73e8;
+            border-radius: 8px;
+            background-color: #f8faff;
+            cursor: pointer;
+            outline: none;
+        }
+        .btn-submit {
+            width: 100%;
             background-color: #1a73e8;
             color: white;
-            text-decoration: none;
-            padding: 14px 32px;
+            border: none;
+            padding: 14px;
             border-radius: 25px;
             font-weight: bold;
             font-size: 16px;
-            transition: background-color 0.3s, transform 0.2s;
+            cursor: pointer;
+            transition: background-color 0.3s;
             box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
         }
-        .btn-link:hover {
+        .btn-submit:hover {
             background-color: #1557b0;
-            transform: translateY(-2px);
         }
-        .btn-link:active {
-            transform: translateY(0);
+        #status-message {
+            margin-top: 15px;
+            font-size: 14px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -84,12 +100,50 @@
         </div>
         
         <h2>Sistem Unggah Sertifikat SDM</h2>
-        <p>Klik tombol di bawah ini untuk mengunggah file sertifikat Anda langsung ke penyimpanan cloud.</p>
+        <p>Pilih file sertifikat Anda langsung di bawah ini lalu klik simpan.</p>
         
-        <a href="https://driveuploader.com/upload/W2whAnwu52/" target="_blank" class="btn-link">
-            Mulai Unggah File
-        </a>
+        <form id="upload-form" action="https://driveuploader.com/upload/W2whAnwu52/" method="POST" enctype="multipart/form-data">
+            <div class="file-input-wrapper">
+                <input type="file" name="sertifikat" class="file-input" required>
+            </div>
+            <button type="submit" class="btn-submit">Mulai Unggah File</button>
+        </form>
+
+        <div id="status-message"></div>
     </div>
+
+    <script>
+        const form = document.getElementById('upload-form');
+        const statusMsg = document.getElementById('status-message');
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            statusMsg.style.color = '#1a73e8';
+            statusMsg.textContent = 'Sedang mengunggah ke Google Drive...';
+
+            const formData = new FormData(form);
+
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: { 'Accept': 'application/json' }
+            })
+            .then(response => {
+                if (response.ok) {
+                    statusMsg.style.color = '#2ecc71';
+                    statusMsg.textContent = '✓ Berhasil! Sertifikat telah tersimpan.';
+                    form.reset();
+                } else {
+                    statusMsg.style.color = '#e74c3c';
+                    statusMsg.textContent = 'Gagal mengunggah file. Coba lagi.';
+                }
+            })
+            .catch(error => {
+                statusMsg.style.color = '#e74c3c';
+                statusMsg.textContent = 'Terjadi kesalahan jaringan.';
+            });
+        });
+    </script>
 
 </body>
 </html>
