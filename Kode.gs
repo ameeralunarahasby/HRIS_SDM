@@ -14,7 +14,6 @@ function doGet(e) {
     for (var i = 1; i < data.length; i++) { 
       var kelompok = data[i][1] ? data[i][1].toString().toLowerCase().trim() : "";
       var keterangan = data[i][2] ? data[i][2].toString() : "";
-      
       if (dropdowns.hasOwnProperty(kelompok)) {
         dropdowns[kelompok].push(keterangan);
       }
@@ -34,26 +33,33 @@ function doPost(e) {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName("Data Pegawai");
     
-    // 1. Folder Utama
-    var folderId = "184coQUbsiGaTx8LhE9T3b067_SeMQytO"; 
+    // 1. Folder Utama (Pastikan ID ini benar)
+    var folderId = "184coQUbsiGaTx8LhE9T3b067_SeMQytO";
     var rootFolder = DriveApp.getFolderById(folderId);
 
     // 2. Tentukan nama sub-folder (ID - Nama)
     var idPegawai = payload['id_pegawai'] || "ID_Kosong";
     var namaPegawai = payload['nama'] || "TanpaNama";
     var subFolderName = idPegawai + " - " + namaPegawai;
-
-    // 3. Cek apakah sub-folder sudah ada, jika belum buat baru
-    var subFolders = rootFolder.getFoldersByName(subFolderName);
-    var targetFolder;
     
-    if (subFolders.hasNext()) {
-      targetFolder = subFolders.next();
-    } else {
+    // 3. LOGIKA BARU: Cari folder dan pastikan BUKAN di tong sampah (Trash)
+    var subFolders = rootFolder.getFoldersByName(subFolderName);
+    var targetFolder = null;
+    
+    while (subFolders.hasNext()) {
+      var f = subFolders.next();
+      if (!f.isTrashed()) { // <-- Mencegah folder hantu di tong sampah
+        targetFolder = f;
+        break;
+      }
+    }
+    
+    // Jika tidak ada folder yang aktif, buat baru
+    if (!targetFolder) {
       targetFolder = rootFolder.createFolder(subFolderName);
     }
 
-    // Kunci urutan Header
+    // 4. Kunci urutan Header
     var headers = [
       'id_pegawai','nik','nama','tempat_lahir','tanggal_lahir','status_keluarga','no_kk',
       'pasangan','jml_anak','anak1','anak2','anak3','alamat','no_hp','email',
@@ -73,15 +79,15 @@ function doPost(e) {
     headers.forEach(function(header) {
       var val = payload[header] || "";
       
-      // Jika mendeteksi ada file Base64, simpan ke targetFolder (bukan rootFolder)
+      // Jika mendeteksi ada file Base64, simpan ke targetFolder
       if (typeof val === 'object' && val.base64) {
          try {
             var blob = Utilities.base64Decode(val.base64);
             var fileName = header + "_" + namaPegawai;
-            
             var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
-            var file = targetFolder.createFile(fileBlob); // <--- SIMPAN DI SINI
             
+            // SIMPAN DI DALAM TARGET FOLDER
+            var file = targetFolder.createFile(fileBlob); 
             val = file.getUrl(); 
          } catch (errFile) {
             val = "Gagal upload: " + errFile.message;
@@ -94,9 +100,9 @@ function doPost(e) {
 
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success', 
-      message: 'Data & File Berhasil Disimpan ke Folder ' + subFolderName
+      message: 'Data & File Berhasil Disimpan ke Folder: ' + subFolderName
     })).setMimeType(ContentService.MimeType.JSON);
-      
+    
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({
       status: 'error', 
