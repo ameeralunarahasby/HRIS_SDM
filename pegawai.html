@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Database Pegawai</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; padding: 20px; margin: 0; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        h2 { margin-bottom: 20px; color: #2c3e50; }
+        
+        /* Box Angka Ringkasan */
+        .summary-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .card-box { background: white; padding: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); text-align: center; border-top: 4px solid #007BFF; }
+        .card-box.aktif { border-top-color: #28a745; }
+        .card-box.pensiun { border-top-color: #ffc107; }
+        .card-box.mutasi { border-top-color: #17a2b8; }
+        .card-box.resign { border-top-color: #dc3545; }
+        .card-box h3 { margin: 0 0 5px 0; font-size: 28px; color: #333; }
+        .card-box p { margin: 0; font-size: 13px; color: #777; font-weight: bold; text-transform: uppercase; }
+
+        /* Filter & Action Toolbar */
+        .toolbar { background: white; padding: 15px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 20px; }
+        .toolbar input, .toolbar select { padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; min-width: 160px; }
+        .btn-add { background: #28a745; color: white; border: none; padding: 10px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 13px; display: inline-flex; align-items: center; margin-right: auto; }
+        .btn-add:hover { background: #218838; }
+
+        /* Style Tabel Utama Berpasangan */
+        .table-responsive { background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.06); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background: #f8f9fa; padding: 12px 15px; color: #555; border-bottom: 2px solid #eee; }
+        td { padding: 12px 15px; border-bottom: 1px solid #eee; vertical-align: top; line-height: 1.5; }
+        tr:hover { background: #f9fbfd; }
+        .sub-text { color: #666; font-size: 12px; margin-top: 2px; }
+        
+        /* Tombol Aksi */
+        .btn-action { padding: 5px 10px; border: none; border-radius: 3px; font-weight: bold; cursor: pointer; font-size: 11px; margin-right: 3px; color: white; }
+        .btn-view { background: #17a2b8; }
+        .btn-edit { background: #ffc107; color: #212529; }
+        .btn-delete { background: #dc3545; }
+        
+        /* Pagination */
+        .pagination { display: flex; justify-content: center; align-items: center; margin-top: 20px; gap: 5px; }
+        .pagination button { padding: 6px 12px; border: 1px solid #ddd; background: white; cursor: pointer; border-radius: 3px; font-size: 13px; }
+        .pagination button.active { background: #007BFF; color: white; border-color: #007BFF; }
+        .pagination button:disabled { background: #eceff1; cursor: not-allowed; color: #999; }
+
+        /* Modal Overlay System */
+        .modal-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); z-index: 1000; overflow-y: auto; padding: 20px 10px; box-sizing: border-box; }
+        .modal-box { background: white; max-width: 800px; margin: 20px auto; padding: 25px; border-radius: 6px; position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+        .modal-header { font-size: 18px; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 15px; color: #007BFF; display: flex; justify-content: space-between; }
+        .modal-close { cursor: pointer; font-size: 20px; color: #aaa; font-weight: bold; }
+        .modal-close:hover { color: #333; }
+        
+        /* Grid Form Di Dalam Modal */
+        .grid-modal { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-size: 11px; font-weight: bold; color: #666; margin-bottom: 3px; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 13px; }
+        .form-group input[readonly] { background-color: #e9ecef; cursor: not-allowed; }
+        .full-width { grid-column: span 2; }
+        .modal-footer { margin-top: 20px; text-align: right; border-top: 1px solid #eee; padding-top: 15px; }
+        
+        /* View Details Styling */
+        .view-detail-item { padding: 6px 0; border-bottom: 1px dashed #f1f1f1; font-size: 13px; }
+        .view-label { font-weight: bold; color: #555; display: inline-block; width: 180px; }
+        .view-val { color: #111; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Dashboard Manajemen Pegawai</h2>
+
+    <div class="summary-wrapper">
+        <div class="card-box text-center"><h3 id="lbl-total">0</h3><p>Total Pegawai</p></div>
+        <div class="card-box aktif"><h3 id="lbl-aktif">0</h3><p>Pegawai Aktif</p></div>
+        <div class="card-box pensiun"><h3 id="lbl-pensiun">0</h3><p>Pensiun</p></div>
+        <div class="card-box mutasi"><h3 id="lbl-mutasi">0</h3><p>Mutasi</p></div>
+        <div class="card-box resign"><h3 id="lbl-resign">0</h3><p>Resign</p></div>
+    </div>
+
+    <div class="toolbar">
+        <a href="index.html" class="btn-add">➕ Tambah Pegawai</a>
+        <input type="text" id="search-box" placeholder="Cari Nama / NIK...">
+        <select id="fltr-status">
+            <option value="">-- Semua Status --</option>
+            <option value="Aktif">Aktif</option>
+            <option value="Mutasi">Mutasi</option>
+            <option value="Pensiun">Pensiun</option>
+            <option value="Pensiun Dini">Pensiun Dini</option>
+            <option value="Resign">Resign</option>
+        </select>
+        <select id="fltr-kelompok-peg">
+            <option value="">-- Semua Kelompok Pegawai --</option>
+            <option value="ASN">ASN</option>
+            <option value="APBD">APBD</option>
+            <option value="BLUD">BLUD</option>
+            <option value="Konsultan">Konsultan</option>
+            <option value="Magang">Magang</option>
+            <option value="Outsourcing">Outsourcing</option>
+        </select>
+        <select id="fltr-kelompok-jab">
+            <option value="">-- Semua Kelompok Jabatan --</option>
+            <option value="Management">Management</option>
+            <option value="Tenaga Medis">Tenaga Medis</option>
+            <option value="Tenaga Kesehatan">Tenaga Kesehatan</option>
+            <option value="Tenaga Penunjang Medis">Tenaga Penunjang Medis</option>
+            <option value="Tenaga Administrasi">Tenaga Administrasi</option>
+            <option value="Tenaga Non Administrasi">Tenaga Non Administrasi</option>
+        </select>
+    </div>
+
+    <div class="table-responsive">
+        <table>
+            <thead>
+                <tr>
+                    <th>NIK / NIP</th>
+                    <th>Nama / Ruangan</th>
+                    <th>Golongan / TMT Pangkat</th>
+                    <th>Jabatan / TMT Jabatan</th>
+                    <th>Masuk RS / Masa Kerja</th>
+                    <th>BUP / TMT Pensiun</th>
+                    <th style="width: 160px;">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="pegawai-table-body">
+                <tr><td colspan="7" style="text-align:center; padding:30px; color:#999;">Sedang memuat data dari server...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination" id="pagination-controls"></div>
+</div>
+
+<div id="modal-view" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>🔎 Detail Lengkap Pegawai</span>
+            <span class="modal-close" onclick="tutupModal('modal-view')">&times;</span>
+        </div>
+        <div id="view-detail-content" style="max-height: 450px; overflow-y:auto; padding-right:10px;"></div>
+        <div class="modal-footer">
+            <button type="button" class="btn-action" style="background:#6c757d; padding:8px 15px;" onclick="tutupModal('modal-view')">Tutup</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-edit" class="modal-overlay">
+    <div class="modal-box">
+        <div class="modal-header">
+            <span>✏️ Edit Data Pegawai</span>
+            <span class="modal-close" onclick="tutupModal('modal-edit')">&times;</span>
+        </div>
+        <form id="editPegawaiForm">
+            <div class="grid-modal" style="max-height: 450px; overflow-y:auto; padding-right:10px;">
+                <div class="form-group"><label>ID Pegawai *</label><input type="text" id="id_pegawai" readonly></div>
+                <div class="form-group"><label>NIK</label><input type="text" id="nik"></div>
+                <div class="form-group"><label>Nama *</label><input type="text" id="nama" required></div>
+                <div class="form-group"><label>Tempat Lahir</label><input type="text" id="tempat_lahir"></div>
+                <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="tanggal_lahir"></div>
+                <div class="form-group">
+                    <label>Status Keluarga</label>
+                    <select id="status_keluarga">
+                        <option value="">Pilih...</option><option value="Lajang">Lajang</option><option value="Menikah">Menikah</option><option value="Cerai Hidup">Cerai Hidup</option><option value="Cerai Mati">Cerai Mati</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>No KK</label><input type="text" id="no_kk"></div>
+                <div class="form-group"><label>Pasangan</label><input type="text" id="pasangan"></div>
+                <div class="form-group">
+                    <label>Jumlah Anak</label>
+                    <select id="jml_anak">
+                        <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+                    </select>
+                </div>
+                <div class="form-group" id="w_anak1" style="display:none;"><label>Anak 1</label><input type="text" id="anak1"></div>
+                <div class="form-group" id="w_anak2" style="display:none;"><label>Anak 2</label><input type="text" id="anak2"></div>
+                <div class="form-group" id="w_anak3" style="display:none;"><label>Anak 3</label><input type="text" id="anak3"></div>
+                
+                <div class="form-group full-width"><label>Alamat</label><input type="text" id="alamat"></div>
+                <div class="form-group"><label>No HP</label><input type="text" id="no_hp"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+                
+                <div class="form-group">
+                    <label>Kelompok Pegawai</label>
+                    <select id="kelompok_pegawai">
+                        <option value="">Pilih...</option><option value="ASN">ASN</option><option value="APBD">APBD</option><option value="BLUD">BLUD</option><option value="Konsultan">Konsultan</option><option value="Magang">Magang</option><option value="Outsourcing">Outsourcing</option>
+                    </select>
+                </div>
+                <div class="form-group" id="w_nip" style="display:none;"><label>NIP</label><input type="text" id="nip"></div>
+                <div class="form-group">
+                    <label>Status Pegawai</label>
+                    <select id="status_pegawai">
+                        <option value="">Pilih...</option><option value="Aktif">Aktif</option><option value="Mutasi">Mutasi</option><option value="Pensiun">Pensiun</option><option value="Pensiun Dini">Pensiun Dini</option><option value="Resign">Resign</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Golongan</label><select id="golongan"><option value="">Pilih...</option></select></div>
+                <div class="form-group" id="w_tmt_pangkat" style="display:none;"><label>TMT Pangkat</label><input type="date" id="tmt_pangkat"></div>
+                <div class="form-group">
+                    <label>Kelompok Jabatan</label>
+                    <select id="kelompok_jabatan">
+                        <option value="">Pilih...</option><option value="Management">Management</option><option value="Tenaga Medis">Tenaga Medis</option><option value="Tenaga Kesehatan">Tenaga Kesehatan</option><option value="Tenaga Penunjang Medis">Tenaga Penunjang Medis</option><option value="Tenaga Administrasi">Tenaga Administrasi</option><option value="Tenaga Non Administrasi">Tenaga Non Administrasi</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Jabatan</label><select id="jabatan"><option value="">Pilih...</option></select></div>
+                <div class="form-group"><label>TMT Jabatan</label><input type="date" id="tmt_jabatan"></div>
+                <div class="form-group"><label>Masuk RS</label><input type="date" id="masuk_rs"></div>
+                <div class="form-group"><label>Masa Kerja</label><input type="text" id="masa_kerja" readonly></div>
+                <div class="form-group" id="w_tmt_cpns" style="display:none;"><label>TMT CPNS</label><input type="date" id="tmt_cpns"></div>
+                <div class="form-group">
+                    <label>BUP</label>
+                    <select id="bup">
+                        <option value="">Pilih...</option><option value="58">58</option><option value="60">60</option><option value="65">65</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>TMT Pensiun</label><input type="date" id="tmt_pensiun" readonly></div>
+                <div class="form-group"><label>Ruangan</label><select id="ruangan"><option value="">Pilih...</option></select></div>
+                <div class="form-group"><label>TMT Nota</label><input type="date" id="tmt_nota"></div>
+                
+                <div class="form-group">
+                    <label>Jenjang</label>
+                    <select id="jenjang">
+                        <option value="">Pilih...</option><option value="S2 + Spesialis">S2 + Spesialis</option><option value="Spesialis">Spesialis</option><option value="Profesi">Profesi</option><option value="S1">S1</option><option value="D4">D4</option><option value="D3">D3</option><option value="SMA">SMA</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Fakultas</label><select id="fakultas"><option value="">Pilih...</option></select></div>
+                <div class="form-group"><label>Jurusan</label><select id="jurusan"><option value="">Pilih...</option></select></div>
+                <div class="form-group"><label>Asal Pendidikan</label><input type="text" id="asal_pendidikan"></div>
+                <div class="form-group"><label>BPJS Kesehatan</label><input type="text" id="bpjs_kesehatan"></div>
+                <div class="form-group"><label>Ketenagakerjaan/Taspen</label><input type="text" id="ketenagakerjaan_taspen"></div>
+                <div class="form-group"><label>NPWP</label><input type="text" id="npwp"></div>
+                
+                <div class="form-group full-width" style="margin-top:10px; font-weight:bold; color:#007BFF; border-bottom:1px solid #eee;">Upload Berkas Baru (Kosongkan jika tidak diganti)</div>
+                <div class="form-group"><label>Foto Baru</label><input type="file" id="file_foto"></div>
+                <div class="form-group"><label>KTP Baru</label><input type="file" id="file_ktp"></div>
+                <div class="form-group"><label>KK Baru</label><input type="file" id="file_kk"></div>
+                <div class="form-group"><label>Ijazah Baru</label><input type="file" id="file_ijazah"></div>
+                <div class="form-group"><label>Pangkat Baru</label><input type="file" id="file_pangkat"></div>
+                <div class="form-group"><label>Jabatan Baru</label><input type="file" id="file_jabatan"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" style="background:#6c757d; color:white; border:none; padding:8px 15px; font-weight:bold; border-radius:4px; cursor:pointer;" onclick="tutupModal('modal-edit')">Batal</button>
+                <button type="submit" id="btnEditSimpan" style="background:#28a745; color:white; border:none; padding:8px 15px; font-weight:bold; border-radius:4px; cursor:pointer;">Simpan Perubahan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="pegawai.js"></script>
+</body>
+</html>
