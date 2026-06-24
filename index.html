@@ -1,150 +1,57 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Unggah Sertifikat SDM</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        body {
-            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .upload-container {
-            background-color: #ffffff;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-        }
-        .icon {
-            width: 80px;
-            height: 80px;
-            background-color: #e8f0fe;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-        }
-        .icon svg {
-            fill: #1a73e8;
-            width: 40px;
-            height: 40px;
-        }
-        h2 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 24px;
-        }
-        p {
-            color: #7f8c8d;
-            font-size: 14px;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-        .file-input-wrapper {
-            position: relative;
-            margin-bottom: 15px;
-        }
-        .file-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px dashed #1a73e8;
-            border-radius: 8px;
-            background-color: #f8faff;
-            cursor: pointer;
-            outline: none;
-        }
-        .btn-submit {
-            width: 100%;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 25px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
-        }
-        .btn-submit:hover {
-            background-color: #1557b0;
-        }
-        #status-message {
-            margin-top: 15px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="upload-container">
-        <div class="icon">
-            <svg viewBox="0 0 24 24">
-                <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"/>
-            </svg>
-        </div>
-        
-        <h2>Sistem Unggah Sertifikat SDM</h2>
-        <p>Pilih file sertifikat Anda langsung di bawah ini lalu klik simpan.</p>
-        
-        <form id="upload-form" action="https://formspree.io/f/mjgqgvke" method="POST" enctype="multipart/form-data">
-            <div class="file-input-wrapper">
-                <input type="file" name="attachment" class="file-input" required>
-            </div>
-            <button type="submit" class="btn-submit">Mulai Unggah File</button>
-        </form>
-
-        <div id="status-message"></div>
+<form id="upload-form">
+    <div class="file-input-wrapper">
+        <input type="file" id="file-field" class="file-input" required>
     </div>
+    <button type="submit" class="btn-submit">Mulai Unggah File</button>
+</form>
+<div id="status-message"></div>
 
-    <script>
-        const form = document.getElementById('upload-form');
-        const statusMsg = document.getElementById('status-message');
+<script>
+    const form = document.getElementById('upload-form');
+    const fileField = document.getElementById('file-field');
+    const statusMsg = document.getElementById('status-message');
+    
+    // Paste URL Google Apps Script (/exec) milikmu di bawah ini
+    const scriptUrl = "PASTE_URL_GOOGLE_APPS_SCRIPT_KAMU_DISINI";
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            statusMsg.style.color = '#1a73e8';
-            statusMsg.textContent = 'Sedang mengunggah ke Google Drive...';
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        statusMsg.style.color = '#1a73e8';
+        statusMsg.textContent = 'Sedang mengunggah ke Google Drive...';
 
-            const formData = new FormData(form);
+        const file = fileField.files[0];
+        const reader = new FileReader();
 
-            fetch(form.action, {
+        reader.onloadend = function() {
+            // Mengubah file menjadi format string base64 agar bisa dibaca Apps Script
+            const base64String = reader.result;
+            
+            const payload = new URLSearchParams();
+            payload.append("attachment", base64String);
+            payload.append("fileName", file.name);
+
+            fetch(scriptUrl, {
                 method: 'POST',
-                body: formData,
-                headers: { 
-                    'Accept': 'application/json' 
-                }
+                body: payload,
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
             })
-            .then(response => {
-                if (response.ok) {
+            .then(res => res.json())
+            .then(data => {
+                if(data.result === "success") {
                     statusMsg.style.color = '#2ecc71';
-                    statusMsg.textContent = '✓ Berhasil! Sertifikat telah tersimpan.';
+                    statusMsg.textContent = '✓ Berhasil! Sertifikat telah tersimpan langsung di Google Drive.';
                     form.reset();
                 } else {
                     statusMsg.style.color = '#e74c3c';
-                    statusMsg.textContent = 'Gagal mengunggah. Pastikan Submission Archive di Formspree aktif.';
+                    statusMsg.textContent = 'Gagal menyimpan: ' + data.error;
                 }
             })
-            .catch(error => {
+            .catch(err => {
                 statusMsg.style.color = '#e74c3c';
                 statusMsg.textContent = 'Terjadi kesalahan jaringan.';
             });
-        });
-    </script>
+        };
 
-</body>
-</html>
+        reader.readAsDataURL(file);
+    });
+</script>
