@@ -1,93 +1,118 @@
-// ==========================================
-// 1. GET DATA UNTUK DROPDOWN
-// ==========================================
+// =============================================================================
+// ⚙️ KONFIGURASI UTAMA (Silakan Ubah Bagian Ini)
+// =============================================================================
+
+// 1. GANTI dengan ID Folder Google Drive Anda (Tempat folder data pegawai akan dibuat)
+const FOLDER_UTAMA_ID = "1W0lBY5AxQpl0F4DdnsV3qoBLewjcFtwW"; 
+
+// 2. Tentukan nama Sheet tempat menyimpan database utama pegawai
+const NAMA_SHEET_DATABASE = "Data Pegawai"; 
+
+// 3. Tentukan nama Sheet tempat data pilihan dropdown berada
+const NAMA_SHEET_PENGATURAN = "Pengaturan";
+
+
+// =============================================================================
+// 1. GET DATA UNTUK DROPDOWN (Fungsi doGet)
+// =============================================================================
 function doGet(e) {
   if (e.parameter.action === 'getDropdown') {
     var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Pengaturan");
-    if (!sheet) return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Sheet Pengaturan tidak ditemukan'})).setMimeType(ContentService.MimeType.JSON);
+    var sheet = ss.getSheetByName(NAMA_SHEET_PENGATURAN);
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({
+        status: 'error', 
+        message: 'Sheet Pengaturan tidak ditemukan'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
     
     var data = sheet.getDataRange().getValues();
     var dropdowns = { golongan: [], jabatan: [], ruangan: [], fakultas: [], jurusan: [] };
     
-    // Looping data mulai baris ke-2 (index 1)
+    // Looping data mulai baris ke-2 (index 1) karena baris ke-1 adalah Header
     for (var i = 1; i < data.length; i++) { 
       var kelompok = data[i][1] ? data[i][1].toString().toLowerCase().trim() : "";
       var keterangan = data[i][2] ? data[i][2].toString() : "";
+      
       if (dropdowns.hasOwnProperty(kelompok)) {
         dropdowns[kelompok].push(keterangan);
       }
     }
     
-    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: dropdowns}))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: 'success', 
+      data: dropdowns
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
-// ==========================================
-// 2. POST DATA & UPLOAD FILE KE GOOGLE DRIVE
-// ==========================================
+
+// =============================================================================
+// 2. POST DATA & UPLOAD FILE KE GOOGLE DRIVE (Fungsi doPost)
+// =============================================================================
 function doPost(e) {
   try {
     var payload = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Data Pegawai");
+    var namaPegawai = payload.nama_pegawai || "Tanpa_Nama";
+    var nip = payload.nip || "";
     
-    // 1. Folder Utama (Pastikan ID ini benar)
-    var folderId = "184coQUbsiGaTx8LhE9T3b067_SeMQytO";
-    var rootFolder = DriveApp.getFolderById(folderId);
-
-    // 2. Tentukan nama sub-folder (ID - Nama)
-    var idPegawai = payload['id_pegawai'] || "ID_Kosong";
-    var namaPegawai = payload['nama'] || "TanpaNama";
-    var subFolderName = idPegawai + " - " + namaPegawai;
+    // --- Langkah A: Siapkan Folder Penyimpanan Pegawai ---
+    var rootFolder = DriveApp.getFolderById(FOLDER_UTAMA_ID);
+    // Membuat nama sub-folder unik berdasarkan Nama & NIP pegawai
+    var subFolderName = namaPegawai + (nip ? "_" + nip : "");
+    var folders = rootFolder.getFoldersByName(subFolderName);
+    var targetFolder;
     
-    // 3. LOGIKA BARU: Cari folder dan pastikan BUKAN di tong sampah (Trash)
-    var subFolders = rootFolder.getFoldersByName(subFolderName);
-    var targetFolder = null;
-    
-    while (subFolders.hasNext()) {
-      var f = subFolders.next();
-      if (!f.isTrashed()) { // <-- Mencegah folder hantu di tong sampah
-        targetFolder = f;
-        break;
-      }
-    }
-    
-    // Jika tidak ada folder yang aktif, buat baru
-    if (!targetFolder) {
+    // Jika folder pegawai sudah ada, gunakan folder tersebut. Jika belum, buat baru.
+    if (folders.hasNext()) {
+      targetFolder = folders.next();
+    } else {
       targetFolder = rootFolder.createFolder(subFolderName);
     }
-
-    // 4. Kunci urutan Header
+    
+    // --- Langkah B: Siapkan Spreadsheet & Sheet Tujuan ---
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var sheet = ss.getSheetByName(NAMA_SHEET_DATABASE);
+    if (!sheet) {
+      // Jika sheet database belum ada, buat otomatis
+      sheet = ss.insertSheet(NAMA_SHEET_DATABASE);
+    }
+    
+    // --- Langkah C: Susunan Header Kolom Google Sheets ---
+    // Pastikan ID/Key di bawah ini sama persis dengan atribut "id" atau "name" di form HTML Anda
     var headers = [
-      'id_pegawai','nik','nama','tempat_lahir','tanggal_lahir','status_keluarga','no_kk',
-      'pasangan','jml_anak','anak1','anak2','anak3','alamat','no_hp','email',
-      'kelompok_pegawai','nip','status_pegawai','golongan','tmt_pangkat','kelompok_jabatan',
-      'jabatan','tmt_jabatan','masuk_rs','masa_kerja','tmt_cpns','bup','tmt_pensiun',
-      'ruangan','tmt_nota','jenjang','fakultas','jurusan','asal_pendidikan',
-      'bpjs_kesehatan','ketenagakerjaan_taspen','npwp',
-      'file_foto','file_ktp','file_kk','file_ijazah','file_transkrip','file_pangkat',
-      'file_jabatan','file_nota','file_bpjs','file_ketenagakerjaan_taspen','file_npwp'
+      'nama_pegawai', 'nip', 'nik', 'tempat_lahir', 'tanggal_lahir', 
+      'jenis_kelamin', 'agama', 'status_perkawinan', 'jml_anak', 'kelompok_pegawai', 
+      'golongan', 'jabatan', 'ruangan', 'fakultas', 'jurusan', 'status_pegawai', 
+      'tgl_sk_awal', 'tmt_pegawai', 'masa_kerja', 'tmt_pensiun', 'alamat_ktp', 
+      'alamat_domisili', 'no_hp', 'email_aktif', 'pendidikan_terakhir', 'asal_pendidikan',
+      'bpjs_kesehatan', 'ketenagakerjaan_taspen', 'npwp',
+      'file_foto', 'file_ktp', 'file_kk', 'file_ijazah', 'file_transkrip', 'file_pangkat',
+      'file_jabatan', 'file_nota', 'file_bpjs', 'file_ketenagakerjaan_taspen', 'file_npwp'
     ];
     
+    // Jika sheet masih kosong/baru, tulis nama-nama header di baris pertama
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(headers);
     }
 
+    // --- Langkah D: Proses Pengisian Data & Konversi File ---
     var rowData = [];
     headers.forEach(function(header) {
       var val = payload[header] || "";
       
-      // Jika mendeteksi ada file Base64, simpan ke targetFolder
+      // Jika mendeteksi ada objek file dalam bentuk Base64
       if (typeof val === 'object' && val.base64) {
          try {
             var blob = Utilities.base64Decode(val.base64);
-            var fileName = header + "_" + namaPegawai;
-            var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
+            // Format nama file: NamaDokumen_NamaPegawai (Contoh: file_foto_Budi_Setiawan)
+            var fileName = header + "_" + namaPegawai.toString().replace(/\s+/g, '_');
             
-            // SIMPAN DI DALAM TARGET FOLDER
+            var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
             var file = targetFolder.createFile(fileBlob); 
+            
+            // Mengubah value data base64 menjadi Link URL Google Drive aktif
             val = file.getUrl(); 
          } catch (errFile) {
             val = "Gagal upload: " + errFile.message;
@@ -96,17 +121,18 @@ function doPost(e) {
       rowData.push(val);
     });
     
+    // Memasukkan satu baris data pegawai baru ke spreadsheet
     sheet.appendRow(rowData);
 
     return ContentService.createTextOutput(JSON.stringify({
       status: 'success', 
-      message: 'Data & File Berhasil Disimpan ke Folder: ' + subFolderName
+      message: 'Data & File Berhasil Disimpan ke Folder ' + subFolderName
     })).setMimeType(ContentService.MimeType.JSON);
     
   } catch (err) {
     return ContentService.createTextOutput(JSON.stringify({
       status: 'error', 
-      message: err.message
+      message: 'Terjadi kesalahan sistem: ' + err.message
     })).setMimeType(ContentService.MimeType.JSON);
   }
 }
