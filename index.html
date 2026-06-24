@@ -2,78 +2,288 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Database Pegawai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Pegawai - Form Wizard</title>
     <style>
         body { font-family: sans-serif; background: #f4f7f6; padding: 20px; }
         .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #333; margin-bottom: 20px; }
+        
+        /* Grid System */
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .form-group { margin-bottom: 10px; }
-        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { width: 100%; padding: 15px; background: #007BFF; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; margin-top: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; color: #555; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        input.invalid { background-color: #ffdddd; border: 1px solid red; }
+        
+        /* Form Wizard Tabs */
+        .tab { display: none; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Navigation Buttons */
+        .btn-container { overflow: auto; margin-top: 25px; border-top: 1px solid #eee; padding-top: 15px; }
+        button { padding: 12px 20px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        #prevBtn { background-color: #bbbbbb; color: white; float: left; }
+        #prevBtn:hover { background-color: #999999; }
+        #nextBtn { background-color: #007BFF; color: white; float: right; }
+        #nextBtn:hover { background-color: #0056b3; }
+        
+        /* Step Indicators */
+        .step-container { text-align: center; margin-bottom: 30px; }
+        .step { height: 30px; width: 30px; margin: 0 5px; background-color: #bbbbbb; border-radius: 50%; display: inline-block; line-height: 30px; color: white; font-weight: bold; font-size: 14px; }
+        .step.active { background-color: #007BFF; }
+        .step.finish { background-color: #28a745; }
+        .tab-title { font-size: 18px; border-bottom: 2px solid #007BFF; padding-bottom: 5px; margin-bottom: 20px; color: #007BFF; }
     </style>
 </head>
 <body>
+
 <div class="container">
-    <h2>Form Input Pegawai</h2>
+    <h2>Form Input Database Pegawai</h2>
+    
+    <div class="step-container">
+        <span class="step" title="Data Pribadi">1</span>
+        <span class="step" title="Data Kepegawaian">2</span>
+        <span class="step" title="Pendidikan & Asuransi">3</span>
+        <span class="step" title="Upload Dokumen">4</span>
+    </div>
+
     <form id="pegawaiForm">
-        <div class="grid-2">
-            <div class="form-group"><label>ID Pegawai</label><input type="text" id="id_pegawai" required></div>
-            <div class="form-group"><label>NIK</label><input type="text" id="nik"></div>
-            <div class="form-group"><label>Nama</label><input type="text" id="nama" required></div>
-            <div class="form-group"><label>Tempat Lahir</label><input type="text" id="tempat_lahir"></div>
-            <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="tanggal_lahir"></div>
-            <div class="form-group"><label>NIP</label><input type="text" id="nip"></div>
-            <div class="form-group"><label>Status Pegawai</label><input type="text" id="status_pegawai"></div>
-            <div class="form-group"><label>Kelompok Pegawai</label><input type="text" id="kelompok_pegawai"></div>
-            <div class="form-group"><label>Golongan</label><input type="text" id="golongan"></div>
-            <div class="form-group"><label>TMT Pangkat</label><input type="date" id="tmt_pangkat"></div>
-            <div class="form-group"><label>Kelompok Jabatan</label><input type="text" id="kelompok_jabatan"></div>
-            <div class="form-group"><label>Jabatan</label><input type="text" id="jabatan"></div>
-            <div class="form-group"><label>TMT Jabatan</label><input type="date" id="tmt_jabatan"></div>
-            <div class="form-group"><label>Masuk RS</label><input type="date" id="masuk_rs"></div>
-            <div class="form-group"><label>Masa Kerja</label><input type="text" id="masa_kerja"></div>
-            <div class="form-group"><label>TMT CPNS</label><input type="date" id="tmt_cpns"></div>
-            <div class="form-group"><label>BUP</label><input type="text" id="bup"></div>
-            <div class="form-group"><label>TMT Pensiun</label><input type="date" id="tmt_pensiun"></div>
-            <div class="form-group"><label>Status Keluarga</label><input type="text" id="status_keluarga"></div>
-            <div class="form-group"><label>No KK</label><input type="text" id="no_kk"></div>
-            <div class="form-group"><label>Pasangan</label><input type="text" id="pasangan"></div>
-            <div class="form-group"><label>Jumlah Anak</label><input type="number" id="jml_anak"></div>
-            <div class="form-group"><label>Anak 1</label><input type="text" id="anak1"></div>
-            <div class="form-group"><label>Anak 2</label><input type="text" id="anak2"></div>
-            <div class="form-group"><label>Anak 3</label><input type="text" id="anak3"></div>
-            <div class="form-group"><label>Alamat</label><input type="text" id="alamat"></div>
-            <div class="form-group"><label>Jenjang</label><input type="text" id="jenjang"></div>
-            <div class="form-group"><label>Fakultas</label><input type="text" id="fakultas"></div>
-            <div class="form-group"><label>Jurusan</label><input type="text" id="jurusan"></div>
-            <div class="form-group"><label>Asal Pendidikan</label><input type="text" id="asal_pendidikan"></div>
-            <div class="form-group"><label>Ruangan</label><input type="text" id="ruangan"></div>
-            <div class="form-group"><label>TMT Nota</label><input type="date" id="tmt_nota"></div>
-            <div class="form-group"><label>BPJS Kesehatan</label><input type="text" id="bpjs_kesehatan"></div>
-            <div class="form-group"><label>Ketenagakerjaan/Taspen</label><input type="text" id="ketenagakerjaan_taspen"></div>
-            <div class="form-group"><label>NPWP</label><input type="text" id="npwp"></div>
-            <div class="form-group"><label>No HP</label><input type="text" id="no_hp"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+        
+        <div class="tab">
+            <h3 class="tab-title">Langkah 1: Data Pribadi & Kontak</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>ID Pegawai *</label><input type="text" id="id_pegawai" required></div>
+                <div class="form-group"><label>NIK</label><input type="text" id="nik"></div>
+                <div class="form-group"><label>Nama *</label><input type="text" id="nama" required></div>
+                <div class="form-group"><label>Tempat Lahir</label><input type="text" id="tempat_lahir"></div>
+                <div class="form-group"><label>Tanggal Lahir</label><input type="date" id="tanggal_lahir"></div>
+                <div class="form-group"><label>Status Keluarga</label><input type="text" id="status_keluarga"></div>
+                <div class="form-group"><label>No KK</label><input type="text" id="no_kk"></div>
+                <div class="form-group"><label>Pasangan</label><input type="text" id="pasangan"></div>
+                <div class="form-group"><label>Jumlah Anak</label><input type="number" id="jml_anak"></div>
+                <div class="form-group"><label>Anak 1</label><input type="text" id="anak1"></div>
+                <div class="form-group"><label>Anak 2</label><input type="text" id="anak2"></div>
+                <div class="form-group"><label>Anak 3</label><input type="text" id="anak3"></div>
+                <div class="form-group"><label>Alamat</label><input type="text" id="alamat"></div>
+                <div class="form-group"><label>No HP</label><input type="text" id="no_hp"></div>
+                <div class="form-group"><label>Email</label><input type="email" id="email"></div>
+            </div>
         </div>
 
-        <hr><h4>Upload Dokumen</h4>
-        <div class="grid-2">
-            <div class="form-group"><label>Foto</label><input type="file" id="file_foto"></div>
-            <div class="form-group"><label>KTP</label><input type="file" id="file_ktp"></div>
-            <div class="form-group"><label>KK</label><input type="file" id="file_kk"></div>
-            <div class="form-group"><label>Ijazah</label><input type="file" id="file_ijazah"></div>
-            <div class="form-group"><label>Transkrip</label><input type="file" id="file_transkrip"></div>
-            <div class="form-group"><label>Pangkat</label><input type="file" id="file_pangkat"></div>
-            <div class="form-group"><label>Jabatan</label><input type="file" id="file_jabatan"></div>
-            <div class="form-group"><label>Nota</label><input type="file" id="file_nota"></div>
-            <div class="form-group"><label>BPJS</label><input type="file" id="file_bpjs"></div>
-            <div class="form-group"><label>Taspen</label><input type="file" id="file_ketenagakerjaan_taspen"></div>
-            <div class="form-group"><label>NPWP</label><input type="file" id="file_npwp"></div>
+        <div class="tab">
+            <h3 class="tab-title">Langkah 2: Data Kepegawaian</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>NIP</label><input type="text" id="nip"></div>
+                <div class="form-group"><label>Status Pegawai</label><input type="text" id="status_pegawai"></div>
+                <div class="form-group"><label>Kelompok Pegawai</label><input type="text" id="kelompok_pegawai"></div>
+                <div class="form-group"><label>Golongan</label><input type="text" id="golongan"></div>
+                <div class="form-group"><label>TMT Pangkat</label><input type="date" id="tmt_pangkat"></div>
+                <div class="form-group"><label>Kelompok Jabatan</label><input type="text" id="kelompok_jabatan"></div>
+                <div class="form-group"><label>Jabatan</label><input type="text" id="jabatan"></div>
+                <div class="form-group"><label>TMT Jabatan</label><input type="date" id="tmt_jabatan"></div>
+                <div class="form-group"><label>Masuk RS</label><input type="date" id="masuk_rs"></div>
+                <div class="form-group"><label>Masa Kerja</label><input type="text" id="masa_kerja"></div>
+                <div class="form-group"><label>TMT CPNS</label><input type="date" id="tmt_cpns"></div>
+                <div class="form-group"><label>BUP</label><input type="text" id="bup"></div>
+                <div class="form-group"><label>TMT Pensiun</label><input type="date" id="tmt_pensiun"></div>
+                <div class="form-group"><label>Ruangan</label><input type="text" id="ruangan"></div>
+                <div class="form-group"><label>TMT Nota</label><input type="date" id="tmt_nota"></div>
+            </div>
         </div>
-        <button type="submit" id="btn">Simpan Data</button>
+
+        <div class="tab">
+            <h3 class="tab-title">Langkah 3: Pendidikan & Asuransi/Pajak</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>Jenjang</label><input type="text" id="jenjang"></div>
+                <div class="form-group"><label>Fakultas</label><input type="text" id="fakultas"></div>
+                <div class="form-group"><label>Jurusan</label><input type="text" id="jurusan"></div>
+                <div class="form-group"><label>Asal Pendidikan</label><input type="text" id="asal_pendidikan"></div>
+                <div class="form-group"><label>BPJS Kesehatan</label><input type="text" id="bpjs_kesehatan"></div>
+                <div class="form-group"><label>Ketenagakerjaan/Taspen</label><input type="text" id="ketenagakerjaan_taspen"></div>
+                <div class="form-group"><label>NPWP</label><input type="text" id="npwp"></div>
+            </div>
+        </div>
+
+        <div class="tab">
+            <h3 class="tab-title">Langkah 4: Upload Dokumen</h3>
+            <div class="grid-2">
+                <div class="form-group"><label>Foto</label><input type="file" id="file_foto"></div>
+                <div class="form-group"><label>KTP</label><input type="file" id="file_ktp"></div>
+                <div class="form-group"><label>KK</label><input type="file" id="file_kk"></div>
+                <div class="form-group"><label>Ijazah</label><input type="file" id="file_ijazah"></div>
+                <div class="form-group"><label>Transkrip</label><input type="file" id="file_transkrip"></div>
+                <div class="form-group"><label>Pangkat</label><input type="file" id="file_pangkat"></div>
+                <div class="form-group"><label>Jabatan</label><input type="file" id="file_jabatan"></div>
+                <div class="form-group"><label>Nota</label><input type="file" id="file_nota"></div>
+                <div class="form-group"><label>BPJS</label><input type="file" id="file_bpjs"></div>
+                <div class="form-group"><label>Taspen</label><input type="file" id="file_ketenagakerjaan_taspen"></div>
+                <div class="form-group"><label>NPWP</label><input type="file" id="file_npwp"></div>
+            </div>
+        </div>
+
+        <div class="btn-container">
+            <button type="button" id="prevBtn" onclick="nextPrev(-1)">Sebelumnya</button>
+            <button type="button" id="nextBtn" onclick="nextPrev(1)">Selanjutnya</button>
+        </div>
     </form>
 </div>
-<script src="script.js"></script>
+
+<script>
+    // --- WIZARD LOGIC ---
+    let currentTab = 0;
+    showTab(currentTab);
+
+    function showTab(n) {
+        let tabs = document.getElementsByClassName("tab");
+        tabs[n].style.display = "block";
+        
+        // Atur tombol
+        if (n == 0) {
+            document.getElementById("prevBtn").style.display = "none";
+        } else {
+            document.getElementById("prevBtn").style.display = "inline";
+        }
+        
+        if (n == (tabs.length - 1)) {
+            document.getElementById("nextBtn").innerHTML = "Simpan Data";
+            document.getElementById("nextBtn").style.backgroundColor = "#28a745"; // Hijau untuk submit
+        } else {
+            document.getElementById("nextBtn").innerHTML = "Selanjutnya";
+            document.getElementById("nextBtn").style.backgroundColor = "#007BFF";
+        }
+        
+        fixStepIndicator(n);
+    }
+
+    function nextPrev(n) {
+        let tabs = document.getElementsByClassName("tab");
+        
+        // Validasi form pada tab saat ini sebelum lanjut
+        if (n == 1 && !validateForm()) return false;
+        
+        // Sembunyikan tab saat ini
+        tabs[currentTab].style.display = "none";
+        
+        // Tambah/kurang index tab
+        currentTab = currentTab + n;
+        
+        // Jika sudah mencapai akhir tab, submit form
+        if (currentTab >= tabs.length) {
+            submitData();
+            // Kembalikan current tab agar tidak error selagi menunggu
+            currentTab = currentTab - n; 
+            tabs[currentTab].style.display = "block";
+            return false;
+        }
+        
+        // Tampilkan tab baru
+        showTab(currentTab);
+    }
+
+    function validateForm() {
+        let tabs, inputs, i, valid = true;
+        tabs = document.getElementsByClassName("tab");
+        inputs = tabs[currentTab].getElementsByTagName("input");
+        
+        // Cek semua input pada tab saat ini
+        for (i = 0; i < inputs.length; i++) {
+            // Jika required tapi kosong
+            if (inputs[i].hasAttribute("required") && inputs[i].value == "") {
+                inputs[i].className += " invalid";
+                valid = false;
+            } else {
+                inputs[i].classList.remove("invalid");
+            }
+        }
+        
+        if (valid) {
+            document.getElementsByClassName("step")[currentTab].className += " finish";
+        }
+        return valid;
+    }
+
+    function fixStepIndicator(n) {
+        let steps = document.getElementsByClassName("step");
+        for (let i = 0; i < steps.length; i++) {
+            steps[i].className = steps[i].className.replace(" active", "");
+        }
+        steps[n].className += " active";
+    }
+
+    // --- SUBMISSION LOGIC (Google Apps Script) ---
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzj_idRXjp2pLTm6R5JfnmMjlw3fTJGI77EcU7R1fe18eqi4jlvXlb4E2Rzmx90LccE_Q/exec";
+
+    async function submitData() {
+        const nextBtn = document.getElementById('nextBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        
+        nextBtn.disabled = true; 
+        prevBtn.disabled = true;
+        nextBtn.innerText = "Mengirim...";
+
+        // 1. Ambil semua input teks (37 Fields)
+        const textIds = [
+            'id_pegawai','nik','nama','tempat_lahir','tanggal_lahir','nip',
+            'status_pegawai','kelompok_pegawai','golongan','tmt_pangkat','kelompok_jabatan',
+            'jabatan','tmt_jabatan','masuk_rs','masa_kerja','tmt_cpns','bup','tmt_pensiun',
+            'status_keluarga','no_kk','pasangan','jml_anak','anak1','anak2','anak3','alamat',
+            'jenjang','fakultas','jurusan','asal_pendidikan','ruangan','tmt_nota',
+            'bpjs_kesehatan','ketenagakerjaan_taspen','npwp','no_hp','email'
+        ];
+        
+        let payload = {};
+        textIds.forEach(id => {
+            let el = document.getElementById(id);
+            if(el) payload[id] = el.value;
+        });
+
+        // 2. Proses File menjadi Base64 (11 Fields)
+        const fileIds = [
+            'file_foto','file_ktp','file_kk','file_ijazah','file_transkrip','file_pangkat',
+            'file_jabatan','file_nota','file_bpjs','file_ketenagakerjaan_taspen','file_npwp'
+        ];
+        
+        for (let id of fileIds) {
+            let fileInput = document.getElementById(id);
+            if (fileInput && fileInput.files.length > 0) {
+                let file = fileInput.files[0];
+                payload[id] = await new Promise(resolve => {
+                    let reader = new FileReader();
+                    reader.onload = () => resolve({base64: reader.result.split(',')[1], mimeType: file.type});
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // 3. Kirim ke Google Apps Script
+        try {
+            let response = await fetch(APPS_SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload)
+            });
+            let result = await response.json();
+            alert(result.message);
+            
+            if(result.status === 'success') {
+                document.getElementById('pegawaiForm').reset();
+                // Reset Wizard ke Tab 1
+                document.getElementsByClassName("tab")[currentTab].style.display = "none";
+                currentTab = 0;
+                let steps = document.getElementsByClassName("step");
+                for (let i = 0; i < steps.length; i++) {
+                    steps[i].className = steps[i].className.replace(" finish", "");
+                }
+                showTab(currentTab);
+            }
+        } catch(err) {
+            alert("Gagal mengirim data: " + err);
+        } finally {
+            nextBtn.disabled = false; 
+            prevBtn.disabled = false;
+            nextBtn.innerText = "Simpan Data";
+        }
+    }
+</script>
 </body>
 </html>
