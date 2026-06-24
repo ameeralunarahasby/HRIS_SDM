@@ -3,65 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mengalihkan ke Google Form...</title>
-    
-    <script>
-        // GANTI teks di bawah ini dengan link Google Form kamu
-        const urlGoogleForm = "https://forms.gle/xCq6Zei57tviqURJ7";
-
-        // Fungsi untuk mengalihkan halaman secara otomatis
-        window.location.href = urlGoogleForm;
-    </script>
-    
+    <title>Upload Langsung ke Google Drive</title>
     <style>
-        body {
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f5f7fa;
+        }
+        body {
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            color: #333;
         }
-        .loading-box {
-            text-align: center;
+        .upload-container {
+            background-color: #ffffff;
             padding: 30px;
-            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 95%;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+        p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        /* Mengatur tampilan kotak upload iframe */
+        iframe {
+            width: 100%;
+            height: 350px;
+            border: 2px dashed #3498db;
             border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #1a73e8;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        a {
-            color: #1a73e8;
-            text-decoration: none;
-            font-weight: bold;
+            background: #fafafa;
         }
     </style>
 </head>
 <body>
 
-    <div class="loading-box">
-        <div class="spinner"></div>
-        <h2>Menghubungkan ke Google Drive...</h2>
-        <p>Jika halaman tidak berpindah otomatis, <a id="fallback-link" href="#">klik di sini</a>.</p>
+    <div class="upload-container">
+        <h2>Area Unggah File Cloud</h2>
+        <p>Pilih file atau seret (drag & drop) langsung ke kotak di bawah ini</p>
+        
+        <iframe src="DI_SINI_PASTE_LINK_IFRAME_DRIVE_UPLOADER" allow="camera"></iframe>
     </div>
 
-    <script>
-        // Mengisi link cadangan jika JavaScript di browser pengguna mati
-        document.getElementById('fallback-link').href = urlGoogleForm;
-    </script>
 </body>
 </html>
