@@ -1,4 +1,4 @@
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxiGWf9PB1LahaHd40DB5RYtnz_YsvYEeUrKSbjdtyuLp9aT_ubKzPI32e6UlMX_rbX4Q/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwExur-8izU76XNR_98CNxq2jSSl9SPUYem3dCNeX2Ps7m6xFRIpJz3quq0_nUNIJy9ZA/exec";
 
 let listPegawai = [];
 let filteredPegawai = [];
