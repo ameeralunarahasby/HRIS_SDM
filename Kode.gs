@@ -1,126 +1,112 @@
 // =============================================================================
 // ⚙️ KONFIGURASI UTAMA
 // =============================================================================
-const FOLDER_UTAMA_ID = "1W0lBY5AxQpl0F4DdnsV3qoBLewjcFtwW";
-const NAMA_SHEET_DATABASE = "Data Pegawai";
-const NAMA_SHEET_PENGATURAN = "Pengaturan";
+const FOLDER_UTAMA_ID = "1W0lBY5AxQpl0F4DdnsV3qoBLewjcFtwW"; 
+const NAMA_SHEET_DATABASE = "Data Pegawai"; 
+const NAMA_SHEET_PENGATURAN = "Pengaturan"; 
 
-// SUSUNAN KOLOM UTAMA SPREADSHEET (SINKRON DENGAN ATTRIBUT FORM)
-const HEADERS_DATABASE = [
-  'id_pegawai','nik','nama','tempat_lahir','tanggal_lahir','status_keluarga','no_kk',
-  'pasangan','jml_anak','anak1','anak2','anak3','alamat','no_hp','email',
-  'kelompok_pegawai','nip','status_pegawai','golongan','tmt_pangkat','kelompok_jabatan',
-  'jabatan','tmt_jabatan','masuk_rs','masa_kerja','tmt_cpns','bup','tmt_pensiun',
-  'ruangan','tmt_nota','jenjang','fakultas','jurusan','asal_pendidikan',
-  'bpjs_kesehatan','ketenagakerjaan_taspen','npwp',
-  'file_foto','file_ktp','file_kk','file_ijazah','file_transkrip','file_pangkat',
-  'file_jabatan','file_nota','file_bpjs','file_ketenagakerjaan_taspen','file_npwp'
+// Struktur Kolom (Harus Konsisten Antara Form Baru, Edit, dan Headers di Sheets)
+const formKeys = [
+  'id_pegawai', 'nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'nip', 'status_pegawai', 
+  'kelompok_pegawai', 'golongan', 'tmt_pangkat', 'kelompok_jabatan', 'jabatan', 'tmt_jabatan', 
+  'masuk_rs', 'masa_kerja', 'tmt_cpns', 'bup', 'tmt_pensiun', 'status_keluarga', 'no_kk', 
+  'pasangan', 'jml_anak', 'anak1', 'anak2', 'anak3', 'alamat', 'jenjang', 'fakultas', 
+  'jurusan', 'asal_pendidikan', 'ruangan', 'tmt_nota', 'bpjs_kesehatan', 'ketenagakerjaan_taspen', 
+  'npwp', 'no_hp', 'email', 'file_foto', 'file_ktp', 'file_kk', 'file_ijazah', 'file_transkrip', 
+  'file_pangkat', 'file_jabatan', 'file_nota', 'file_bpjs', 'file_ketenagakerjaan_taspen', 'file_npwp'
+];
+
+const sheetHeaders = [
+  'id_pegawai', 'nik', 'nama', 'tempat_lahir', 'tanggal_lahir', 'nip', 'status_pegawai', 
+  'kelompok_pegawai', 'golongan', 'tmt_pangkat', 'kelompok_jabatan', 'jabatan', 'tmt_jabatan', 
+  'masuk_rs', 'masa_kerja', 'tmt_cpns', 'bup', 'tmt_pensiun', 'status_keluarga', 'no_kk', 
+  'pasangan', 'jml_anak', 'anak1', 'anak2', 'anak3', 'alamat', 'jenjang', 'fakultas', 
+  'jurusan', 'asal_pendidikan', 'ruangan', 'tmt_nota', 'bpjs_kesehatan', 'ketenagakerjaan_taspen', 
+  'npwp', 'no_hp', 'email', 'url_foto', 'url_ktp', 'url_kk', 'url_ijazah', 'url_transkrip', 
+  'url_pangkat', 'url_jabatan', 'url_nota', 'url_bpjs', 'url_ketenagakerjaan_taspen', 'url_npwp'
 ];
 
 // =============================================================================
-// 1. FUNGSI GET DATA (doGet)
+// 1. GET DATA (Fungsi doGet)
 // =============================================================================
 function doGet(e) {
   var action = e.parameter.action;
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   
-  // A. Tarik Data Dropdown untuk Form
-  if (action === 'getDropdown') {
-    var sheet = ss.getSheetByName(NAMA_SHEET_PENGATURAN);
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Sheet Pengaturan tidak ditemukan'})).setMimeType(ContentService.MimeType.JSON);
-    }
-    var data = sheet.getDataRange().getValues();
-    var dropdowns = { golongan: [], jabatan: [], ruangan: [], ... { fakultas: [], jurusan: [] } };
+  // A. Mengambil Data Dropdown Pengaturan
+  if (action === 'getDropdown') { 
+    var sheet = ss.getSheetByName(NAMA_SHEET_PENGATURAN); 
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Sheet tidak ditemukan'})).setMimeType(ContentService.MimeType.JSON);
+    var data = sheet.getDataRange().getValues(); 
+    var dropdowns = { golongan: [], jabatan: [], ruangan: [], fakultas: [], jurusan: [] }; 
     for (var i = 1; i < data.length; i++) { 
-      var kelompok = data[i][1] ? data[i][1].toString().toLowerCase().trim() : "";
+      var kelompok = data[i][1] ? data[i][1].toString().toLowerCase().trim() : ""; 
       var keterangan = data[i][2] ? data[i][2].toString() : "";
-      if (dropdowns.hasOwnProperty(kelompok)) {
-        dropdowns[kelompok].push(keterangan);
-      }
+      if (dropdowns.hasOwnProperty(kelompok)) dropdowns[kelompok].push(keterangan); 
     }
-    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: dropdowns})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: dropdowns})).setMimeType(ContentService.MimeType.JSON); 
   }
   
-  // B. Tarik Semua Data Pegawai untuk Dashboard Tabel
+  // B. Mengambil Semua Data Pegawai untuk Dashboard
   if (action === 'getPegawai') {
     var sheet = ss.getSheetByName(NAMA_SHEET_DATABASE);
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({status: 'success', data: []})).setMimeType(ContentService.MimeType.JSON);
-    }
-    var data = sheet.getDataRange().getValues();
-    if (data.length <= 1) {
-      return ContentService.createTextOutput(JSON.stringify({status: 'success', data: []})).setMimeType(ContentService.MimeType.JSON);
-    }
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({status: 'success', data: []})).setMimeType(ContentService.MimeType.JSON);
     
-    var sheetHeaders = data[0];
-    var result = [];
+    var data = sheet.getDataRange().getValues();
+    if (data.length <= 1) return ContentService.createTextOutput(JSON.stringify({status: 'success', data: []})).setMimeType(ContentService.MimeType.JSON);
+    
+    var headers = data[0];
+    var rows = [];
     for (var i = 1; i < data.length; i++) {
-      var row = data[i];
       var obj = {};
-      for (var j = 0; j < sheetHeaders.length; j++) {
-        obj[sheetHeaders[j]] = row[j];
+      for (var j = 0; j < headers.length; j++) {
+        // Mengubah objek Date ke format string YYYY-MM-DD agar mudah dibaca HTML input
+        if (data[i][j] instanceof Date) {
+          obj[headers[j]] = Utilities.formatDate(data[i][j], Session.getScriptTimeZone(), "yyyy-MM-dd");
+        } else {
+          obj[headers[j]] = data[i][j];
+        }
       }
-      result.push(obj);
+      rows.push(obj);
     }
-    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: result})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({status: 'success', data: rows})).setMimeType(ContentService.MimeType.JSON);
   }
 }
 
 // =============================================================================
-// 2. FUNGSI POST DATA - ADD, EDIT, DELETE (doPost)
+// 2. POST DATA / UPDATE / DELETE (Fungsi doPost)
 // =============================================================================
 function doPost(e) {
   try {
     var payload = JSON.parse(e.postData.contents);
-    var action = payload.action || "add"; // Default 'add' jika dari index.html lama
+    var action = payload.action || 'create'; // Default ke create jika tidak ada parameter aksi
     
     var ss = SpreadsheetApp.getActiveSpreadsheet();
     var sheet = ss.getSheetByName(NAMA_SHEET_DATABASE);
-    if (!sheet) {
-      sheet = ss.insertSheet(NAMA_SHEET_DATABASE);
-    }
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow(HEADERS_DATABASE);
-    }
+    if (!sheet) sheet = ss.insertSheet(NAMA_SHEET_DATABASE); 
     
-    var data = sheet.getDataRange().getValues();
+    if (sheet.getLastRow() === 0) sheet.appendRow(sheetHeaders);
 
-    // ---------------- PROSES AMBIL / BUAT FOLDER DRIVE ----------------
-    function dapatkanFolderPegawai(nama, nip) {
-      var rootFolder = DriveApp.getFolderById(FOLDER_UTAMA_ID);
-      var subFolderName = nama + (nip ? "_" + nip : "");
-      var folders = rootFolder.getFoldersByName(subFolderName);
-      return folders.hasNext() ? folders.next() : rootFolder.createFolder(subFolderName);
-    }
+    var idPegawai = payload.id_pegawai;
+    var namaPegawai = payload.nama || "Tanpa_Nama";
+    var nip = payload.nip || "";
 
-    // ---------------- A. TAMBAH PEGAWAI BARU ----------------
-    if (action === "add") {
-      var targetFolder = dapatkanFolderPegawai(payload.nama || "Tanpa_Nama", payload.nip || "");
-      var rowData = [];
-      
-      HEADERS_DATABASE.forEach(function(header) {
-        var val = payload[header] || "";
-        if (typeof val === 'object' && val.base64) {
-          try {
-            var blob = Utilities.base64Decode(val.base64);
-            var fileName = header + "_" + (payload.nama || "file").toString().replace(/\s+/g, '_');
-            var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
-            var file = targetFolder.createFile(fileBlob); 
-            val = file.getUrl(); 
-          } catch (fErr) { val = "Gagal upload: " + fErr.message; }
+    // ------------------ PROSES HAPUS DATA ------------------
+    if (action === 'delete') {
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        if (data[i][0].toString() === idPegawai.toString()) {
+          sheet.deleteRow(i + 1);
+          return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data Pegawai Berhasil Dihapus!'})).setMimeType(ContentService.MimeType.JSON);
         }
-        rowData.push(val);
-      });
-      sheet.appendRow(rowData);
-      return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data Berhasil Disimpan!'})).setMimeType(ContentService.MimeType.JSON);
+      }
+      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'ID Pegawai tidak ditemukan'})).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // ---------------- B. EDIT DATA PEGAWAI ----------------
-    if (action === "edit") {
-      var idPegawai = payload.id_pegawai;
+    // ------------------ PROSES EDIT / UPDATE DATA ------------------
+    if (action === 'update') {
+      var data = sheet.getDataRange().getValues();
       var rowIndex = -1;
-      
       for (var i = 1; i < data.length; i++) {
         if (data[i][0].toString() === idPegawai.toString()) {
           rowIndex = i + 1;
@@ -129,52 +115,65 @@ function doPost(e) {
       }
       
       if (rowIndex === -1) {
-        return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'ID Pegawai tidak ditemukan di database!'})).setMimeType(ContentService.MimeType.JSON);
+        return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Data Pegawai gagal diperbarui, ID tidak ditemukan'})).setMimeType(ContentService.MimeType.JSON);
       }
-      
-      var targetFolder = dapatkanFolderPegawai(payload.nama || "Tanpa_Nama", payload.nip || "");
-      
-      HEADERS_DATABASE.forEach(function(header, colIdx) {
-        if (header === 'id_pegawai') return; // Kunci utama jangan diubah
-        
-        var val = payload[header];
-        if (val !== undefined) {
-          if (typeof val === 'object' && val.base64) {
-            try {
-              var blob = Utilities.base64Decode(val.base64);
-              var fileName = header + "_" + (payload.nama || "file").toString().replace(/\s+/g, '_');
-              var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
-              var file = targetFolder.createFile(fileBlob); 
-              val = file.getUrl(); 
-            } catch (fErr) { val = "Gagal upload: " + fErr.message; }
-          }
-          // Jika field file kosong saat edit, biarkan link file lama tetap ada (jangan ditimpa kosong)
-          if (header.indexOf('file_') === 0 && !val) return;
-          
-          sheet.getRange(rowIndex, colIdx + 1).setValue(val);
+
+      var rootFolder = DriveApp.getFolderById(FOLDER_UTAMA_ID); 
+      var subFolderName = namaPegawai + (nip ? "_" + nip : ""); 
+      var folders = rootFolder.getFoldersByName(subFolderName); 
+      var targetFolder = folders.hasNext() ? folders.next() : rootFolder.createFolder(subFolderName); 
+
+      for (var j = 0; j < sheetHeaders.length; j++) {
+        var header = sheetHeaders[j];
+        var key = formKeys[j];
+        var val = payload[key] !== undefined ? payload[key] : (payload[header] || "");
+
+        if (val && typeof val === 'object' && val.base64) {
+          try {
+            var blob = Utilities.base64Decode(val.base64); 
+            var fileName = key + "_" + namaPegawai.toString().replace(/\s+/g, '_'); 
+            var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
+            var file = targetFolder.createFile(fileBlob); 
+            val = file.getUrl();
+          } catch (fErr) { val = "Gagal upload: " + fErr.message; }
+        } else if (val === "" && header.indexOf('url_') === 0) {
+          // Jika saat edit berkas dikosongkan, gunakan url berkas lama agar tidak terhapus
+          val = data[rowIndex - 1][j];
         }
-      });
-      return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data Berhasil Diperbarui!'})).setMimeType(ContentService.MimeType.JSON);
+
+        if (header === 'id_pegawai') val = idPegawai; // Kunci ID jangan berubah
+        sheet.getRange(rowIndex, j + 1).setValue(val);
+      }
+
+      return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data Pegawai Berhasil Diperbarui!'})).setMimeType(ContentService.MimeType.JSON);
     }
 
-    // ---------------- C. HAPUS PEGAWAI ----------------
-    if (action === "delete") {
-      var idPegawai = payload.id_pegawai;
-      var rowIndex = -1;
-      for (var i = 1; i < data.length; i++) {
-        if (data[i][0].toString() === idPegawai.toString()) {
-          rowIndex = i + 1;
-          break;
+    // ------------------ PROSES TAMBAH BARU (CREATE) ------------------
+    if (action === 'create') {
+      var rootFolder = DriveApp.getFolderById(FOLDER_UTAMA_ID); 
+      var subFolderName = namaPegawai + (nip ? "_" + nip : ""); 
+      var folders = rootFolder.getFoldersByName(subFolderName); 
+      var targetFolder = folders.hasNext() ? folders.next() : rootFolder.createFolder(subFolderName); 
+
+      var rowData = [];
+      formKeys.forEach(function(key) { 
+        var val = payload[key] || "";
+        if (typeof val === 'object' && val.base64) { 
+          try {
+            var blob = Utilities.base64Decode(val.base64);
+            var fileName = key + "_" + namaPegawai.toString().replace(/\s+/g, '_'); 
+            var fileBlob = Utilities.newBlob(blob, val.mimeType, fileName);
+            var file = targetFolder.createFile(fileBlob); 
+            val = file.getUrl();
+          } catch (errFile) { val = "Gagal upload: " + errFile.message; }
         }
-      }
-      if (rowIndex !== -1) {
-        sheet.deleteRow(rowIndex);
-        return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data Berhasil Dihapus!'})).setMimeType(ContentService.MimeType.JSON);
-      }
-      return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Data tidak ditemukan!'})).setMimeType(ContentService.MimeType.JSON);
+        rowData.push(val);
+      });
+      sheet.appendRow(rowData); 
+      return ContentService.createTextOutput(JSON.stringify({status: 'success', message: 'Data & File Berhasil Disimpan!'})).setMimeType(ContentService.MimeType.JSON); 
     }
 
   } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Sistem Error: ' + err.message})).setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({status: 'error', message: 'Terjadi kesalahan: ' + err.message})).setMimeType(ContentService.MimeType.JSON); 
   }
 }
